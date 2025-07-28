@@ -1,4 +1,6 @@
-# Preflight - Database
+# Preflight - Database Design Lab
+
+Please find additional instructions for [Database Design Lab](Database-Design-Lab.md) here
 
 ## Setup
 
