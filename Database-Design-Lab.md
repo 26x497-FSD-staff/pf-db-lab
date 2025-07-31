@@ -27,11 +27,24 @@ Install Prisma extension (from prisma.io)
 - Create `.env` from `.env.example.*`
   - `.env.example.postgres` : `.env` template for **PostgreSQL** project
   - `.env.example.mongodb` : `.env` template for **MongoDB** project
+- Create `.npmrc` from `.npmrc.example` (only for Windows user)
+  - For Windows, run `npm run eol` (take care of CRLF issue)
+
+## Create database schema for `Prisma ORM`
+   
 - Inside `prisma` directory, create `schema.prisma` from `schema.*.*`
   - `schema.postgres.todos` : schema for **upgraded Todo** application
   - `schema.postgres.posts` : schema for **Social** application
   - `schema.mongo.enrollments` : schema for **Student enrollments** application
-- Run `docker compose up -d` to start a PostgreSQL container
+ 
+## Start database container
+
+- Run `docker compose -f <compose-file> up -d` to database container
+  - `-f compose-postgres.yml` for PostgreSQL database
+  - `-f compose-postgres.yml` for MongoDB database
+ 
+## Generate prisma client according to the schema and sync with datatbase
+
 - Run `npx prisma generate` to generate `PrismaClient`
 - Run `npx prisma db push` to sync up schema to the database
 
