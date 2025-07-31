@@ -30,18 +30,19 @@ Install Prisma extension (from prisma.io)
 - Create `.npmrc` from `.npmrc.example` (only for Windows user)
   - For Windows, run `npm run eol` (take care of CRLF issue)
 
-## Create database schema for `Prisma ORM`
-
-- Inside `prisma` directory, create `schema.prisma` from `schema.*.*`
-  - `schema.postgres.todos` : schema for **upgraded Todo** application
-  - `schema.postgres.posts` : schema for **Social** application
-  - `schema.mongo.enrollments` : schema for **Student enrollments** application
-
 ## Start database container
 
 - Run `docker compose -f <compose-file> up -d` to database container
   - `-f compose-postgres.yml` for PostgreSQL database
   - `-f compose-postgres.yml` for MongoDB database
+
+## Create database schema for `Prisma ORM`
+
+- Inside `prisma` directory, create `schema.prisma` from `schema.*.*`
+  - `schema.postgres.todos` : schema for **upgraded Todo** application
+  - `schema.postgres.posts` : schema for **Social** application
+    - Create a new database and specify its own according to `POSTGRES_DB` and `POSTGRES_APP_USER`
+  - `schema.mongo.enrollments` : schema for **Student enrollments** application
 
 ## Generate prisma client according to the schema and sync with datatbase
 
