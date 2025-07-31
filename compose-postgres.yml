@@ -7,7 +7,7 @@ services:
       - 5432:${POSTGRES_PORT}
     volumes:
       - pf-data:/var/lib/postgresql/data
-      - ./_entrypoint:/docker-entrypoint-initdb.d
+      - ./_entrypoint/init-postgres.sh:/docker-entrypoint-initdb.d/init-postgres.sh:ro
     environment:
       - TZ=Asia/Bangkok
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}

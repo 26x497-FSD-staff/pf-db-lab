@@ -1,5 +1,6 @@
 import { prisma } from "./getPrisma.ts";
 
+// add a user
 const insertUser = async () => {
   const uname = `user${Math.floor(Math.random() * 100)}`;
   try {
@@ -18,6 +19,7 @@ const insertUser = async () => {
   }
 };
 
+// add a new post that belongs to specified user
 const insertPost = async (userId: number) => {
   const uname = `user${Math.floor(Math.random() * 100)}`;
   try {
@@ -35,6 +37,7 @@ const insertPost = async (userId: number) => {
   }
 };
 
+// query a user with his/her posts
 const queryUserWithPosts = async (userId: number) => {
   try {
     const results = await prisma.user.findFirst({
@@ -53,6 +56,7 @@ const queryUserWithPosts = async (userId: number) => {
   }
 };
 
+// query a user with his/her posts with published status
 const queryUserWithPosts2 = async (userId: number, published = true) => {
   try {
     const results = await prisma.user.findFirst({
@@ -60,6 +64,7 @@ const queryUserWithPosts2 = async (userId: number, published = true) => {
         id: userId,
       },
       select: {
+        id: true,
         email: true,
         name: true,
         posts: {
@@ -81,6 +86,7 @@ const queryUserWithPosts2 = async (userId: number, published = true) => {
   }
 };
 
+// query a post with author information
 const queryPostWithUser = async (postId: number, published = false) => {
   try {
     const results = await prisma.post.findFirst({
@@ -100,6 +106,7 @@ const queryPostWithUser = async (postId: number, published = false) => {
   }
 };
 
+// Update a post that belongs to specified user
 const updatePost = async (userId: number, postId: number) => {
   try {
     const todoItem = await prisma.post.findFirst({
@@ -154,14 +161,18 @@ const updatePost = async (userId: number, postId: number) => {
 
 // ***** Testing ****
 
-// insertUser();
+// add some users
 // for (let i = 0; i < 10; i++) insertUser();
 
+// add some posts
 // const numPosts = 30;
 // for (let i = 0; i < numPosts; i++) {
 //   const userId = Math.floor(Math.random() * 10);
 //   insertPost(userId);
 // }
+
+// add a post with invalid userId
+// insertPost(11);
 
 // queryUserWithPosts(5);
 // queryUserWithPosts(8);
@@ -169,10 +180,10 @@ const updatePost = async (userId: number, postId: number) => {
 // queryUserWithPosts2(5, false);
 // queryUserWithPosts2(8, false);
 
-// queryPostWithUser(37);
-// queryPostWithUser(40);
+// queryPostWithUser(15);
+// queryPostWithUser(23);
 
-// updatePost(5, 3);
-// updatePost(5, 8);
+// updatePost(8, 19);
+// updatePost(8, 29);
 // updatePost(5, 51);
 // updatePost(5, 54);

@@ -27,7 +27,7 @@ const queryData = async () => {
   }
 };
 
-const updateData = async (todoId: string, isDone: boolean) => {
+const updateData = async (todoId: string, isDone: boolean = true) => {
   try {
     const todoItem = await prisma.todo.findFirst({
       where: {
@@ -54,7 +54,6 @@ const updateData = async (todoId: string, isDone: boolean) => {
       data: {
         todo_text: `Update: ${Date.now().toPrecision(3)}`,
         is_done: isDone,
-        // updated_at: Date.now(),
       },
     });
     console.log("Todo updated successfully:", updatedTodo);
@@ -84,12 +83,12 @@ const deleteData = async (todoId: string) => {
 
 // ***** Testing ****
 
-for (let i = 0; i < 10; i++) insertData();
+// for (let i = 0; i < 10; i++) insertData();
 
 // queryData();
 
-// const todoId = "1c9dde9c-334b-4ee4-af47-4427e21fb413";
-// updateData(todoId, false);
+// const todoId = "0eb0efca-2b33-4312-9e0b-246c677ea3a0";
+// updateData(todoId);
 
-// const todoId = "52814dfe-b657-4f9e-ad8a-174a983c4431";
+// const todoId = "48f5ecd3-7918-4110-b78c-9c87e012a404";
 // deleteData(todoId);
