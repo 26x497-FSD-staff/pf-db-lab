@@ -59,7 +59,7 @@ Install Prisma extension (from prisma.io)
 
 ---
 
-## test_todos.ts : Test CRUD on Todo database
+## 1. Test CRUD on Todo database (`test_todos.ts`)
 
 ### Create a new Todo item
 
@@ -178,7 +178,12 @@ deleteData(todoId);
 
 ## Using PostgreSQL to store NoSQL data
 
+[Working with JSON field with Prisma](https://www.prisma.io/docs/orm/prisma-client/special-fields-and-types/working-with-json-fields)
+
+We will create a new PostgreSQL column with `jsonb` data type. This can be used to store JSON data (object, array).
+
 ### Update database schema
+
 Add a `sub_tasks` column to the `todos` table by modifying `schema.prisma` as followed
 
 ```typescript
@@ -330,7 +335,239 @@ subtasks?.map((item: TaskItem, index: number) => {
 });
 ```
 
+---
+
+## 2. Test CRUD on Posts database (`test_posts.ts`)
+
+In this example, we implement `one-to-many` relation between Author/User and his/her Posts. We also add a `Foreign Key` into the schema to enfore the relationship.
+
+### Steps-by-Steps:
+
+- Update `prisma/schema.prisma` with the content from `prisma/schema.postgres.posts`
+- Update `.env` by changing the variable `POSTGRES_DB` to new value: e.g., `post_database`
+- Generate new `Prisma client` according to the new schema
+  - `npx prisma generate`
+- Update the Postgres database schema
+  - `npx prisma db push`
+- Open `labs/test_posts.ts`
+
+### Create a new User
+
+```typescript
+import { prisma } from "./getPrisma.ts";
+
+// Create a new user (post's author)
+const insertUser = async () => {
+  const uname = `user${Math.floor(Math.random() * 100)}`;
+  try {
+    const results = await prisma.user.create({
+      data: {
+        email: `${uname}@app.com`,
+        name: uname,
+      },
+    });
+    console.log(results);
+  } catch (error) {
+    console.error("Something is wrong: insertUser()");
+    console.error(error);
+  } finally {
+    await prisma.$disconnect();
+  }
+};
+
+// Test - add 10 users
+for (let i = 0; i < 10; i++) insertUser();
+```
+
+### Create a new Post belonging to specified User (by userId)
+
+```typescript
+// Create a new post that belongs to specified user
+const insertPost = async (userId: number) => {
+  const uname = `user${Math.floor(Math.random() * 100)}`;
+  try {
+    const results = await prisma.post.create({
+      data: {
+        title: `Title: ${Date.now().toString()}`,
+        authorId: userId,
+      },
+    });
+    console.log(results);
+  } catch (error) {
+    console.error("Something is wrong: insertPost()");
+  } finally {
+    await prisma.$disconnect();
+  }
+};
+
+// Test - add 30 posts (with random userId)
+const numPosts = 30;
+for (let i = 0; i < numPosts; i++) {
+  const userId = Math.floor(Math.random() * 10);
+  insertPost(userId);
+}
+
+// Test - add a post with invalid userId
+// insertPost(11);
+````
 
 
 
+### Query a Post with its Author information
+
+```typescript
+// query a post with author information
+const queryPostWithUser = async (postId: number, published = false) => {
+  try {
+    const results = await prisma.post.findFirst({
+      where: {
+        id: postId,
+        published: published,
+      },
+      include: {
+        author: true,
+      },
+    });
+    console.log(results);
+  } catch (error) {
+    console.error("Something is wrong: queryPostWithUser()");
+  } finally {
+    await prisma.$disconnect();
+  }
+};
+
+// Test
+queryPostWithUser(15);
+queryPostWithUser(23);
+```
+
+### Query a User with all his/her Posts
+
+```typescript
+// query a user with his/her posts
+const queryUserWithPosts = async (userId: number) => {
+  try {
+    const results = await prisma.user.findFirst({
+      where: {
+        id: userId,
+      },
+      include: {
+        posts: true,
+      },
+    });
+    console.log(results);
+  } catch (error) {
+    console.error("Something is wrong: queryUserWithPosts()");
+  } finally {
+    await prisma.$disconnect();
+  }
+};
+
+// Test
+queryUserWithPosts(5);
+queryUserWithPosts(8);
+```
+
+### Query a User with his/her Posts (with specified published condition)
+
+```typescript
+// query a user with his/her posts with published status
+const queryUserWithPosts2 = async (userId: number, published = true) => {
+  try {
+    const results = await prisma.user.findFirst({
+      where: {
+        id: userId,
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        posts: {
+          where: {
+            published: published,
+          },
+          select: {
+            title: true,
+            published: true,
+          },
+        },
+      },
+    });
+    console.log(results);
+  } catch (error) {
+    console.error("Something is wrong: queryUserWithPost2()");
+  } finally {
+    await prisma.$disconnect();
+  }
+};
+
+// Test
+queryUserWithPosts2(5, false);
+queryUserWithPosts2(8, false);
+queryUserWithPosts2(5);
+queryUserWithPosts2(8);
+
+
+```
+
+### Update a Post (by postId and authorId)
+
+```typescript
+// Update a post that belongs to specified user
+const updatePost = async (userId: number, postId: number) => {
+  try {
+    const todoItem = await prisma.post.findFirst({
+      where: {
+        id: postId,
+        authorId: userId,
+      },
+    });
+
+    if (!todoItem) {
+      console.log(`Post(${userId}, ${postId}) not found`);
+      return;
+    }
+  } catch (error) {
+    console.error("Something is wrong: updatePost()");
+    return;
+  } finally {
+    await prisma.$disconnect();
+  }
+
+  try {
+    const todoItem = await prisma.post.findFirst({
+      where: {
+        id: postId,
+        authorId: userId,
+      },
+    });
+
+    if (!todoItem) {
+      console.log(`Post(${userId}, ${postId}) not found`);
+      return;
+    }
+
+    const updatedPost = await prisma.post.update({
+      where: {
+        id: postId,
+      },
+      data: {
+        title: `Update: ${Date.now().toPrecision(3)}`,
+        published: todoItem.published ? false : true,
+      },
+    });
+    console.log("Todo updated successfully:", updatedPost);
+    return updatedPost;
+  } catch (error) {
+    console.error("Error updating post:", postId);
+    throw error;
+  } finally {
+    await prisma.$disconnect();
+  }
+};
+
+// Test
+updatePost(8, 29);
+updatePost(5, 51);
+```
 
